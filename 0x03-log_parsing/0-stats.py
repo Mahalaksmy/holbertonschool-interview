@@ -1,54 +1,51 @@
 #!/usr/bin/python3
-"""This is script that reads stdin line by line and computes metrics:"""
+"""This is script that reads stdin element by element and computes metrics:"""
 
 import sys
 
-data = {"Size": 0, "Codes": {"200": 0, "301": 0, "400": 0, "401": 0,
-                             "403": 0, "404": 0, "405": 0, "500": 0}}
-
-
-def printFormat():
-    """Function that prints the file size and all the status codes"""
-
-    print("File size: {}".format(data['Size']))
-
-    for statusCode, count in sorted(data['Codes'].items()):
-        if count != 0:
-            print("{}: {}".format(statusCode, count))
-
-
 if __name__ == "__main__":
 
+    datas = {200: 0, 301: 0, 400: 0, 401: 0,
+                    403: 0, 404: 0, 405: 0, 500: 0}
+    file_size = [0]
+    count = 1
+
+    def print_stats():
+        '''
+        Prints file size and stats for every 10 loops
+        '''
+        print('File size: {}'.format(file_size[0]))
+
+        for code in sorted(param.keys()):
+            if param[code] != 0:
+                print('{}: {}'.format(code, param[code]))
+
+    def parse_stdin(param):
+        '''
+        Checks the stdin for matches
+        '''
+        try:
+            param = param[:-1]
+            word = param.split(' ')
+
+            file_size[0] += int(word[-1])
+
+            data = int(word[-2])
+
+            if data in param:
+                param[data] += 1
+        except BaseException:
+            pass
+
     try:
+        for param in sys.stdin:
+            parse_stdin(line)
 
-        values = 1
-        for line in sys.stdin:
-
-            """Split the line taken from stdin and save only the needed data"""
-
-            newValue = line.split(" ")
-            try:
-                size = int(newValue[-1])
-                code = newValue[-2]
-
-                """If the status code is a possible status code
-                it will count + 1 in the dict to count how many of they are"""
-
-                if code in data['Codes']:
-                    data['Codes'][code] += 1
-
-                data['Size'] += size
-            except:
-                pass
-
-            if values % 10 == 0:
-                printFormat()
-
-            values += 1
-
+            if count % 10 == 0:
+                print_stats()
+            count += 1
     except KeyboardInterrupt:
-        """Handling CTRL + C"""
-        printFormat()
+        print_stats()
         raise
-
-    printFormat()
+    print_stats()
+    
